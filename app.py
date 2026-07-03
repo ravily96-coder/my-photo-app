@@ -14,15 +14,18 @@ if uploaded_file is not None:
     col1, col2, col3 = st.columns(3)
 
     # Универсальная функция для запуска
-    def run_tool(space_id, api_name, image):
-        with st.spinner('Нейросеть обрабатывает фото...'):
+    def run_tool(space_id, image):
+        with st.spinner('Подключаюсь к ИИ...'):
             try:
                 client = Client(space_id)
-                # Вызов для большинства моделей требует параметр image
+                # Выводим список доступных функций, если не знаем имя
+                # Мы берем первую доступную функцию из списка
+                api_name = client.view_api(print_json=False, return_format="dict")['named_endpoints'][0]
+                
                 result = client.predict(image=image, api_name=api_name)
                 return Image.open(result)
             except Exception as e:
-                st.error(f"Ошибка: {e}. Попробуйте еще раз.")
+                st.error(f"Ошибка: {e}")
                 return None
 
     with col1:
