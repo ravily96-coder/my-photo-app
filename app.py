@@ -28,10 +28,28 @@ if uploaded_file is not None:
     if st.button('Омолодить фото с AI'):
         with st.spinner('Работает нейросеть CodeFormer... Это займет 5-15 секунд.'):
             try:
-                # --- Магия ИИ (Подключение к Replicate) ---
-                # Мы используем модель CodeFormer для реставрации лиц
-                model = replicate.models.get("sczhou/codeformer")
-                version = model.versions.get("7ab7596c45b3313814b00b3f986a329639f5474656132119aa5f6c1e08477809")
+                # --- Магия ИИ (Универсальный вызов) ---
+                # Используем прямой вызов модели без поиска версии вручную
+                input_data = {
+                    "image": uploaded_file,
+                    "codeformer_fidelity": 0.5,
+                    "background_enhance": True,
+                    "face_upsample": True,
+                    "upscale": 2
+                }
+                
+                # Запускаем модель напрямую
+                output = replicate.run(
+                    "sczhou/codeformer:7ab7596c45b3313814b00b3f986a329639f5474656132119aa5f6c1e08477809",
+                    input=input_data
+                )
+                
+                # output в новых версиях обычно сразу возвращает URL или объект
+                output_url = output 
+                
+                # --- Скачивание результата ---
+                response = requests.get(output_url)
+                result_image = Image.open(BytesIO(response.content))
                 
                 # Запускаем модель
                 output_url = version.predict(
