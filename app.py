@@ -3,39 +3,42 @@ from gradio_client import Client
 from PIL import Image
 import io
 
-st.set_page_config(page_title="AI Photo Pro", page_icon="✨")
+st.set_page_config(page_title="AI Photo Master", page_icon="✨")
 st.title("✨ AI Photo Editor Pro")
 
-uploaded_file = st.file_uploader("Выберите фото...", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Загрузите фото для обработки...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption='Оригинал', use_column_width=True)
     
     col1, col2, col3 = st.columns(3)
 
-    def run_inference(space_id, api_name, image):
-        with st.spinner('ИИ обрабатывает...'):
+    # Универсальная функция для запуска
+    def run_tool(space_id, api_name, image):
+        with st.spinner('Нейросеть обрабатывает фото...'):
             try:
                 client = Client(space_id)
-                # Передаем файл как путь или объект
+                # Вызов для большинства моделей требует параметр image
                 result = client.predict(image=image, api_name=api_name)
                 return Image.open(result)
             except Exception as e:
-                st.error(f"Модель временно недоступна: {e}")
+                st.error(f"Ошибка: {e}. Попробуйте еще раз.")
                 return None
 
     with col1:
-        if st.button('Улучшить лицо'):
-            res = run_inference("radames/face-restoration", "/predict", uploaded_file)
-            if res: st.image(res, caption='Результат: Лицо')
+        if st.button('Омолодить'):
+            # CodeFormer для реставрации лиц
+            res = run_tool("sczhou/CodeFormer", "/predict", uploaded_file)
+            if res: st.image(res, caption='Результат: Омоложение')
 
     with col2:
         if st.button('Убрать фон'):
-            res = run_inference("abhishek/rembg", "/predict", uploaded_file)
+            # Rembg для удаления фона
+            res = run_tool("abhishek/rembg", "/predict", uploaded_file)
             if res: st.image(res, caption='Результат: Без фона')
 
     with col3:
-        if st.button('Увеличить (Upscale)'):
-            # Модель для апскейлинга
-            res = run_inference("nateraw/real-esrgan", "/predict", uploaded_file)
-            if res: st.image(res, caption='Результат: Увеличен')
+        if st.button('Улучшить (Upscale)'):
+            # Real-ESRGAN для улучшения качества и детализации
+            res = run_tool("nateraw/real-esrgan", "/predict", uploaded_file)
+            if res: st.image(res, caption='Результат: Улучшено')
