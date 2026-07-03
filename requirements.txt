@@ -1,5 +1,3 @@
 streamlit
-Pillow
-replicate
-requests
-huggingface_hub
+gradio_client
+pillow
