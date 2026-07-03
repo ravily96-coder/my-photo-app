@@ -1,41 +1,44 @@
 import streamlit as st
+from gradio_client import Client
 from PIL import Image
-import os
 import io
-from huggingface_hub import InferenceClient
 
-st.set_page_config(page_title="AI Photo Editor Free", page_icon="✨")
-st.title("✨ AI Photo Editor")
-
-# Получаем ключ
-api_key = os.environ.get("HUGGINGFACEHUB_API_TOKEN")
-if not api_key:
-    st.error("Ошибка: Ключ HUGGINGFACEHUB_API_TOKEN не найден в Secrets.")
-    st.stop()
-
-# Инициализируем клиент Hugging Face
-client = InferenceClient(token=api_key)
+st.set_page_config(page_title="AI Photo Editor Pro", page_icon="✨")
+st.title("✨ AI Photo Editor Pro")
 
 uploaded_file = st.file_uploader("Выберите фото...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption='Оригинал', use_column_width=True)
-    img_bytes = uploaded_file.getvalue()
+    
+    col1, col2, col3 = st.columns(3)
 
-    if st.button('Улучшить фото'):
-        with st.spinner('Обработка...'):
+    # Функция обработки через Gradio
+    def process_ai(client_path, api_name, file_input):
+        with st.spinner('ИИ думает...'):
             try:
-                # Используем более простую модель для задач Image-to-Image
-                # Многие тяжелые модели требуют времени на "запуск" (loading)
-                image = Image.open(io.BytesIO(img_bytes))
-                
-                # Используем встроенный метод client.image_to_image
-                # Это надежнее, чем ручной запрос
-                res = client.image_to_image(
-                    image=image,
-                    model="runwayml/stable-diffusion-v1-5" 
-                )
-                
-                st.image(res, caption='Результат')
+                client = Client(client_path)
+                result = client.predict(image=file_input, api_name=api_name)
+                # Gradio возвращает путь к файлу или объект, открываем его
+                return Image.open(result)
             except Exception as e:
-                st.error(f"Ошибка при работе с ИИ: {e}")
+                st.error(f"Ошибка при обработке: {e}")
+                return None
+
+    # Кнопка 1: Улучшение лиц (GFPGAN)
+    with col1:
+        if st.button('Улучшить лицо'):
+            res = process_ai("gfpgan/GFPGAN", "/predict", uploaded_file)
+            if res: st.image(res, caption='Результат: Лицо')
+
+    # Кнопка 2: Апскейл (Real-ESRGAN)
+    with col2:
+        if st.button('Увеличить (4x)'):
+            res = process_ai("nateraw/real-esrgan", "/predict", uploaded_file)
+            if res: st.image(res, caption='Результат: Увеличено')
+
+    # Кнопка 3: Удаление фона (Rembg)
+    with col3:
+        if st.button('Убрать фон'):
+            res = process_ai("akhaliq/rembg", "/predict", uploaded_file)
+            if res: st.image(res, caption='Результат: Без фона')
