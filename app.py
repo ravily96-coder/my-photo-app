@@ -24,9 +24,23 @@ if uploaded_file is not None:
             
             # Вызов модели через Hugging Face
             # Используем популярную модель GFPGAN
-            response = client.image_to_image(
-                model="ap123/GFPGAN",
-                image=img_byte_arr.getvalue()
-            )
+            response = # Используем универсальный метод, который сам находит модель для улучшения изображений
+            # GFPGAN в облаке часто недоступен через API напрямую, поэтому используем другой подход
+            try:
+                # Отправляем запрос на задачу image-to-image
+                # Мы используем модель, которая часто доступна в бесплатном Inference API
+                model_id = "runwayml/stable-diffusion-v1-5" 
+                
+                # Примечание: API Hugging Face меняется, поэтому мы используем более простой POST запрос
+                import requests
+                API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+                headers = {"Authorization": f"Bearer {api_key}"}
+                
+                response = requests.post(API_URL, headers=headers, data=img_byte_arr.getvalue())
+                result_image = Image.open(io.BytesIO(response.content))
+                st.image(result_image, caption='Результат')
+                
+            except Exception as e:
+                st.error(f"Не удалось обработать изображение: {e}")
             
             st.image(response, caption='Результат')
