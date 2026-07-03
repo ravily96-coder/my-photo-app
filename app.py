@@ -5,75 +5,48 @@ import os
 import requests
 from io import BytesIO
 
-# --- Конфигурация ---
-st.set_page_config(page_title="AI Rejuvenator Pro", page_icon="✨")
-st.title("✨ AI Photo Rejuvenator Pro")
-st.write("Загрузите портрет, чтобы нейросеть убрала возраст и улучшила детализацию.")
+st.set_page_config(page_title="AI Photo Editor Pro", page_icon="✨")
+st.title("✨ AI Photo Editor Pro")
 
-# Получаем API ключ из секретов Streamlit (безопасно)
+# Получение API ключа
 try:
     os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_API_TOKEN"]
-except KeyError:
-    st.error("Ошибка: REPLICATE_API_TOKEN не найден в настройках Secrets.")
-    st.stop() # Останавливаем выполнение, если ключа нет
+except:
+    st.error("Ошибка: REPLICATE_API_TOKEN не найден в Secrets.")
+    st.stop()
 
-# --- Интерфейс ---
-uploaded_file = st.file_uploader("Выберите портрет (файл)...", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Выберите фото...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
-    # Отображаем оригинал
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Оригинал', use_column_width=True)
+    st.image(uploaded_file, caption='Оригинал', use_column_width=True)
     
-    if st.button('Омолодить фото с AI'):
-        with st.spinner('Работает нейросеть CodeFormer... Это займет 5-15 секунд.'):
+    col1, col2, col3 = st.columns(3)
+
+    # Функция обработки
+    def process_image(model_path, input_data):
+        with st.spinner('Обработка ИИ...'):
             try:
-                # --- Магия ИИ (Универсальный вызов) ---
-                # Используем прямой вызов модели без поиска версии вручную
-                input_data = {
-                    "image": uploaded_file,
-                    "codeformer_fidelity": 0.5,
-                    "background_enhance": True,
-                    "face_upsample": True,
-                    "upscale": 2
-                }
-                
-                # Запускаем модель напрямую
-                output = replicate.run(
-                    "sczhou/codeformer:7ab7596c45b3313814b00b3f986a329639f5474656132119aa5f6c1e08477809",
-                    input=input_data
-                )
-                
-                # output в новых версиях обычно сразу возвращает URL или объект
-                output_url = output 
-                
-                # --- Скачивание результата ---
+                output_url = replicate.run(model_path, input=input_data)
                 response = requests.get(output_url)
-                result_image = Image.open(BytesIO(response.content))
-                
-                # Запускаем модель
-                output_url = version.predict(
-                    image=uploaded_file,
-                    codeformer_fidelity=0.5, # От 0 (лучшее качество лица) до 1 (лучшее сходство)
-                    background_enhance=True,
-                    face_upsample=True,
-                    upscale=2 # Увеличить в 2 раза
-                )
-                                               
-                # Кнопка для скачивания
-                buf = BytesIO()
-                result_image.save(buf, format="PNG")
-                byte_im = buf.getvalue()
-                st.download_button(
-                    label="Скачать результат",
-                    data=byte_im,
-                    file_name="rejuvenated_photo.png",
-                    mime="image/png"
-                )
-
+                return Image.open(BytesIO(response.content))
             except Exception as e:
-                st.error(f"Произошла ошибка: {e}")
+                st.error(f"Ошибка: {e}")
+                return None
 
-# --- Футер ---
-st.write("---")
-st.write("Технология: CodeFormer (via Replicate API).")
+    with col1:
+        if st.button('Омолодить'):
+            res = process_image("sczhou/codeformer:7ab7596c45b3313814b00b3f986a329639f5474656132119aa5f6c1e08477809", 
+                                {"image": uploaded_file, "codeformer_fidelity": 0.5})
+            if res: st.image(res, caption='Результат: Омоложение')
+
+    with col2:
+        if st.button('Улучшить (Upscale)'):
+            res = process_image("nightmareai/real-esrgan:42fed1c4974616d2f7587123985b62b7137f8f9f6007b8a7d23d854408544c9b", 
+                                {"image": uploaded_file, "scale": 2})
+            if res: st.image(res, caption='Результат: Улучшено')
+
+    with col3:
+        if st.button('Убрать шумы'):
+            res = process_image("tencentarc/gfpgan:9283608cc6b7be6b65a8e44983db012355fde4132009bf99d976b2f0896856a3", 
+                                {"img": uploaded_file})
+            if res: st.image(res, caption='Результат: Без шума')
