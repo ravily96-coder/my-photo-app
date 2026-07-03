@@ -2,3 +2,4 @@ streamlit
 Pillow
 replicate
 requests
+huggingface_hub
