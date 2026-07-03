@@ -59,15 +59,7 @@ if uploaded_file is not None:
                     face_upsample=True,
                     upscale=2 # Увеличить в 2 раза
                 )
-                
-                # --- Скачивание результата ---
-                response = requests.get(output_url)
-                result_image = Image.open(BytesIO(response.content))
-                
-                # --- Отображение ---
-                st.success("Готово!")
-                st.image(result_image, caption='Результат (AI омоложение)', use_column_width=True)
-                
+                                               
                 # Кнопка для скачивания
                 buf = BytesIO()
                 result_image.save(buf, format="PNG")
