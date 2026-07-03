@@ -1,19 +1,19 @@
 import streamlit as st
 from PIL import Image
 
-# Заголовок приложения
-st.title("AI Фото-Редактор")
+# Р—Р°РіРѕР»РѕРІРѕРє РїСЂРёР»РѕР¶РµРЅРёСЏ
+st.title("AI Р¤РѕС‚Рѕ-Р РµРґР°РєС‚РѕСЂ")
 
-# Загрузка фото
-uploaded_file = st.file_uploader("Выберите фото...", type=["jpg", "png"])
+# Р—Р°РіСЂСѓР·РєР° С„РѕС‚Рѕ
+uploaded_file = st.file_uploader("Р’С‹Р±РµСЂРёС‚Рµ С„РѕС‚Рѕ...", type=["jpg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption='Ваше фото', use_column_width=True)
+    st.image(image, caption='Р’Р°С€Рµ С„РѕС‚Рѕ', use_column_width=True)
     
-    if st.button('Омолодить фото (AI)'):
-        st.write("Обработка... Подождите 10 секунд.")
-        # Здесь будет вызов API (например, Replicate)
-        # Пока что это заглушка, которая имитирует работу
-        st.success("Готово! Ваше фото улучшено.")
-        st.image(image, caption='Результат') # Тут будет результат из AI
+    if st.button('РћРјРѕР»РѕРґРёС‚СЊ С„РѕС‚Рѕ (AI)'):
+        st.write("РћР±СЂР°Р±РѕС‚РєР°... РџРѕРґРѕР¶РґРёС‚Рµ 10 СЃРµРєСѓРЅРґ.")
+        # Р—РґРµСЃСЊ Р±СѓРґРµС‚ РІС‹Р·РѕРІ API (РЅР°РїСЂРёРјРµСЂ, Replicate)
+        # РџРѕРєР° С‡С‚Рѕ СЌС‚Рѕ Р·Р°РіР»СѓС€РєР°, РєРѕС‚РѕСЂР°СЏ РёРјРёС‚РёСЂСѓРµС‚ СЂР°Р±РѕС‚Сѓ
+        st.success("Р“РѕС‚РѕРІРѕ! Р’Р°С€Рµ С„РѕС‚Рѕ СѓР»СѓС‡С€РµРЅРѕ.")
+        st.image(image, caption='Р РµР·СѓР»СЊС‚Р°С‚') # РўСѓС‚ Р±СѓРґРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚ РёР· AI
