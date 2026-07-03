@@ -1,46 +1,44 @@
 import streamlit as st
 from PIL import Image
-from huggingface_hub import InferenceClient
+import os
+import requests
 import io
 
-st.set_page_config(page_title="AI Editor Free", page_icon="✨")
-st.title("✨ AI Photo Editor (Free Edition)")
+st.set_page_config(page_title="AI Photo Editor Free", page_icon="✨")
+st.title("✨ AI Photo Editor")
 
-# Получаем токен из секретов
-api_key = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
-client = InferenceClient(api_key=api_key)
+# Получаем ключ из переменных окружения
+api_key = os.environ.get("HUGGINGFACEHUB_API_TOKEN")
+if not api_key:
+    st.error("Ошибка: Ключ HUGGINGFACEHUB_API_TOKEN не найден в настройках Secrets.")
+    st.stop()
 
-uploaded_file = st.file_uploader("Загрузите портрет...", type=["jpg", "png"])
+uploaded_file = st.file_uploader("Выберите фото...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption='Оригинал')
+    st.image(image, caption='Оригинал', use_column_width=True)
     
-    if st.button('Улучшить лицо (GFPGAN)'):
-        with st.spinner('Нейросеть работает...'):
-            # Конвертируем фото в байты для отправки
-            img_byte_arr = io.BytesIO()
-            image.save(img_byte_arr, format='PNG')
-            
-            # Вызов модели через Hugging Face
-            # Используем популярную модель GFPGAN
-            response = # Используем универсальный метод, который сам находит модель для улучшения изображений
-            # GFPGAN в облаке часто недоступен через API напрямую, поэтому используем другой подход
+    if st.button('Улучшить фото'):
+        with st.spinner('Обработка через Hugging Face...'):
             try:
-                # Отправляем запрос на задачу image-to-image
-                # Мы используем модель, которая часто доступна в бесплатном Inference API
-                model_id = "runwayml/stable-diffusion-v1-5" 
-                
-                # Примечание: API Hugging Face меняется, поэтому мы используем более простой POST запрос
-                import requests
-                API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+                # Адрес модели для апскейлинга (улучшения качества)
+                API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-x4-upscaler"
                 headers = {"Authorization": f"Bearer {api_key}"}
                 
-                response = requests.post(API_URL, headers=headers, data=img_byte_arr.getvalue())
-                result_image = Image.open(io.BytesIO(response.content))
-                st.image(result_image, caption='Результат')
+                # Подготовка данных
+                img_bytes = uploaded_file.getvalue()
                 
+                # Запрос к API
+                response = requests.post(API_URL, headers=headers, data=img_bytes)
+                
+                if response.status_code == 200:
+                    result_image = Image.open(io.BytesIO(response.content))
+                    st.image(result_image, caption='Результат (Улучшено)')
+                else:
+                    st.error(f"Ошибка API: {response.status_code} - {response.text}")
+                    
             except Exception as e:
-                st.error(f"Не удалось обработать изображение: {e}")
+                st.error(f"Не удалось обработать: {e}")
             
-            st.image(response, caption='Результат')
+           
