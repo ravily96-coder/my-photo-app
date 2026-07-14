@@ -1,3 +1,4 @@
+from ai_models import ai
 import streamlit as st
 from PIL import Image, ImageEnhance, ImageFilter
 from io import BytesIO
