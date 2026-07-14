@@ -226,20 +226,18 @@ except Exception as e:
                     progress.progress(i + 1, text=f"AI {i+1}%")
 
                 if mode == "🚀 Улучшение фото":
-                    result = enhance_photo(image)
+                    result = ai.enhance(image)
 
                 elif mode == "👶 Омоложение":
-                    result = rejuvenate(image)
-
+                    result = ai.rejuvenate(image)
                 elif mode == "🖼 Восстановление":
-                    result = restore(image)
+                    result = ai.restore(image)
 
                 elif mode == "🎨 Улучшение цветов":
-                    result = colors(image)
+                    result = ai.colors(image)
 
                 elif mode == "✨ Повышение резкости":
-                    result = sharpen(image)
-
+                    result = ai.sharpen(image)
                 elif mode == "📸 Удаление шума":
                     result = denoise(image)
 
