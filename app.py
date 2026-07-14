@@ -196,7 +196,11 @@ uploaded = st.file_uploader(
 
 if uploaded is not None:
 
+try:
     image = Image.open(uploaded).convert("RGB")
+except Exception as e:
+    st.error(f"Ошибка открытия изображения: {e}")
+    st.stop()    
 
     col1, col2 = st.columns(2)
 
