@@ -197,11 +197,11 @@ uploaded = st.file_uploader(
 
 if uploaded is not None:
 
-try:
-    image = Image.open(uploaded).convert("RGB")
-except Exception as e:
-    st.error(f"Ошибка открытия изображения: {e}")
-    st.stop()    
+    try:
+        image = Image.open(uploaded).convert("RGB")
+    except Exception as e:
+        st.error(f"Ошибка открытия изображения: {e}")
+        st.stop()
 
     col1, col2 = st.columns(2)
 
@@ -220,7 +220,7 @@ except Exception as e:
             with st.spinner("AI анализирует изображение..."):
 
                 progress = st.progress(0, text="Обработка...")
-                
+
                 for i in range(100):
                     time.sleep(0.01)
                     progress.progress(i + 1, text=f"AI {i+1}%")
@@ -230,6 +230,7 @@ except Exception as e:
 
                 elif mode == "👶 Омоложение":
                     result = ai.rejuvenate(image)
+
                 elif mode == "🖼 Восстановление":
                     result = ai.restore(image)
 
@@ -238,8 +239,9 @@ except Exception as e:
 
                 elif mode == "✨ Повышение резкости":
                     result = ai.sharpen(image)
+
                 elif mode == "📸 Удаление шума":
-                    result = denoise(image)
+                    result = ai.denoise(image)
 
                 else:
                     result = image.copy()
@@ -248,7 +250,6 @@ except Exception as e:
 
             st.image(result, use_container_width=True)
 
-            # Сохраняем результат в session_state
             st.session_state["result"] = result
 
         else:
