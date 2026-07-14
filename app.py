@@ -218,9 +218,11 @@ except Exception as e:
 
             with st.spinner("AI анализирует изображение..."):
 
+                progress = st.progress(0, text="Обработка...")
+                
                 for i in range(100):
                     time.sleep(0.01)
-                    progress.progress(i + 1)
+                    progress.progress(i + 1, text=f"AI {i+1}%")
 
                 if mode == "🚀 Улучшение фото":
                     result = enhance_photo(image)
