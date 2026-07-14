@@ -1,33 +1,57 @@
 from PIL import Image
-import requests
 import os
 from io import BytesIO
 
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-
-class AIProvider:
+class AIModels:
 
     def __init__(self):
-        self.token = HF_TOKEN
+        self.provider = "demo"
 
-    def enhance(self, image: Image.Image):
-        raise NotImplementedError
-
-    def restore(self, image: Image.Image):
-        raise NotImplementedError
-
-    def rejuvenate(self, image: Image.Image):
-        raise NotImplementedError
-
-
-class DemoProvider(AIProvider):
+    def set_provider(self, provider):
+        self.provider = provider
 
     def enhance(self, image):
-        return image
+        if self.provider == "demo":
+            return image
 
-    def restore(self, image):
-        return image
+        elif self.provider == "replicate":
+            return self.replicate_enhance(image)
 
     def rejuvenate(self, image):
+        if self.provider == "demo":
+            return image
+
+        elif self.provider == "replicate":
+            return self.replicate_rejuvenate(image)
+
+    def restore(self, image):
+        if self.provider == "demo":
+            return image
+
+        elif self.provider == "replicate":
+            return self.replicate_restore(image)
+
+    def colors(self, image):
         return image
+
+    def sharpen(self, image):
+        return image
+
+    def denoise(self, image):
+        return image
+
+    # ---------------------------------------
+    # REPLICATE
+    # ---------------------------------------
+
+    def replicate_enhance(self, image):
+        raise NotImplementedError("Replicate еще не подключен")
+
+    def replicate_rejuvenate(self, image):
+        raise NotImplementedError("Replicate еще не подключен")
+
+    def replicate_restore(self, image):
+        raise NotImplementedError("Replicate еще не подключен")
+
+
+ai = AIModels()
